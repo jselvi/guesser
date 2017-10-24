@@ -100,6 +100,7 @@ func main() {
     var right string
     var wrong string
     var charset string
+    var init string
     var threads int
     var delay int
 
@@ -108,6 +109,7 @@ func main() {
     flag.StringVar(&right, "right", " ", "term that makes cmd to give a right response")
     flag.StringVar(&wrong, "wrong", "^", "term that makes cmd to give a wrong response")
     flag.StringVar(&charset, "charset", "0123456789abcdef", "charset we use for guessing")
+    flag.StringVar(&init, "init", "", "Initial search string")
     flag.IntVar(&threads, "threads", 10, "amount of threads to use")
     flag.IntVar(&delay, "delay", 0, "delay between connections")
     flag.Parse()
@@ -124,7 +126,7 @@ func main() {
     var tmp = make(map[string]bool)
     var res = make(map[string]bool)
     var mtx sync.Mutex
-    pending[""] = "->"
+    pending[init] = "->"
 
     // While no pending strings to test, go for it
     for ( len(pending) > 0 ) {
@@ -134,7 +136,7 @@ func main() {
         delete(pending, key)
 
         // If key is substring from a previous result, continue
-        if len(key) > 1 && already_result(res, key) {
+        if len(key) > len(init)+1 && already_result(res, key) {
             continue
         }
 
