@@ -118,7 +118,7 @@ func main() {
     score_right, err1 := score(cmd, right, 5)
     _          , err2 := score(cmd, wrong, 5)
     if (err1 != nil) || (err2 != nil) {
-        fmt.Println("Unestable")
+        fmt.Println("Unstable")
     }
 
     // Prepare a Set for substrings and a Set for results
