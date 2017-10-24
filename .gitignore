@@ -4,6 +4,9 @@
 *.so
 *.dylib
 
+# Shellcodes
+*.sh
+
 # Test binary, build with `go test -c`
 *.test
 
