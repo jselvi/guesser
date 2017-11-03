@@ -68,9 +68,9 @@ func score(cmd string, param string, repeat int) (int, error) {
 
 // Gets longest key (more close to get a result)
 func sample(m map[string]string) (string, error) {
-    var l int = 0
+    var l int
     var key string
-    for k, _ := range m {
+    for k := range m {
         if len(k) > l {
             key = k
             l = len(k)
@@ -78,14 +78,13 @@ func sample(m map[string]string) (string, error) {
     }
     if l > 0 {
         return key, nil
-    } else {
-        return "", errors.New("Empty Set")
     }
+    return "", errors.New("Empty Set")
 }
 
 // Is "s" substring of any result from "m"?
-func already_result(m map[string]bool, s string) bool {
-    for k, _ := range m {
+func isAlreadyResult(m map[string]bool, s string) bool {
+    for k := range m {
         if strings.Contains(k, s) {
             return true
         }
@@ -115,7 +114,7 @@ func main() {
     flag.Parse()
 
     // Check stability
-    score_right, err1 := score(cmd, right, 5)
+    scoreRight, err1 := score(cmd, right, 5)
     _          , err2 := score(cmd, wrong, 5)
     if (err1 != nil) || (err2 != nil) {
         fmt.Println("Unstable")
@@ -136,7 +135,7 @@ func main() {
         delete(pending, key)
 
         // If key is substring from a previous result, continue
-        if len(key) > len(init)+1 && already_result(res, key) {
+        if len(key) > len(init)+1 && isAlreadyResult(res, key) {
             continue
         }
 
@@ -178,7 +177,7 @@ func main() {
                     tmp[term] = true
                     mtx.Unlock()
                 }
-            } (pending, cmd, key, dir, c, score_right, res)
+            } (pending, cmd, key, dir, c, scoreRight, res)
         }
 
         // Wait for goroutines to finish
