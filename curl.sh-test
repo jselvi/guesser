@@ -1,6 +1,5 @@
 read OUT
 
-echo 1
 echo "beef1234cafe
 faa123" | grep "$OUT" &>/dev/null
 echo $?
