@@ -94,28 +94,19 @@ func isAlreadyResult(m map[string]bool, s string) bool {
 
 // Main func
 func main() {
-
-    var cmd string
-    var right string
-    var wrong string
-    var charset string
-    var init string
-    var threads int
-    var delay int
-
     // Params parsing
-    flag.StringVar(&cmd, "cmd", "sh curl.sh", "command to run, parameter sent via stdin")
-    flag.StringVar(&right, "right", " ", "term that makes cmd to give a right response")
-    flag.StringVar(&wrong, "wrong", "^", "term that makes cmd to give a wrong response")
-    flag.StringVar(&charset, "charset", "0123456789abcdef", "charset we use for guessing")
-    flag.StringVar(&init, "init", "", "Initial search string")
-    flag.IntVar(&threads, "threads", 10, "amount of threads to use")
-    flag.IntVar(&delay, "delay", 0, "delay between connections")
+    cmd     := flag.String("cmd"    , "sh curl.sh"      , "command to run, parameter sent via stdin")
+    right   := flag.String("right"  , " "               , "term that makes cmd to give a right response")
+    wrong   := flag.String("wrong"  , "^"               , "term that makes cmd to give a wrong response")
+    charset := flag.String("charset", "0123456789abcdef", "charset we use for guessing")
+    init    := flag.String("init"   , ""                , "Initial search string")
+    threads := flag.Int(   "threads", 10                , "amount of threads to use")
+    //delay   := flag.Int(   "delay"  , 0                 , "delay between connections")
     flag.Parse()
 
     // Check stability
-    scoreRight, err1 := score(cmd, right, 5)
-    _          , err2 := score(cmd, wrong, 5)
+    scoreRight, err1 := score(*cmd, *right, 5)
+    _          , err2 := score(*cmd, *wrong, 5)
     if (err1 != nil) || (err2 != nil) {
         fmt.Println("Unstable")
     }
@@ -125,7 +116,7 @@ func main() {
     var tmp = make(map[string]bool)
     var res = make(map[string]bool)
     var mtx sync.Mutex
-    pending[init] = "->"
+    pending[*init] = "->"
 
     // While no pending strings to test, go for it
     for ( len(pending) > 0 ) {
@@ -135,19 +126,19 @@ func main() {
         delete(pending, key)
 
         // If key is substring from a previous result, continue
-        if len(key) > len(init)+1 && isAlreadyResult(res, key) {
+        if len(key) > len(*init)+1 && isAlreadyResult(res, key) {
             continue
         }
 
         // Prepare Wait Group
         var wg sync.WaitGroup
-        wg.Add( len(charset) )
+        wg.Add( len(*charset) )
 
         // Goroutines guessing
-        for _, r := range charset {
+        for _, r := range *charset {
 
             // Wait until we have available threads
-            for runtime.NumGoroutine() >= threads+1 {
+            for runtime.NumGoroutine() >= (*threads)+1 {
                 time.Sleep(100 * time.Millisecond)
             }
 
@@ -177,14 +168,14 @@ func main() {
                     tmp[term] = true
                     mtx.Unlock()
                 }
-            } (pending, cmd, key, dir, c, scoreRight, res)
+            } (pending, *cmd, key, dir, c, scoreRight, res)
         }
 
         // Wait for goroutines to finish
         wg.Wait()
 
         // If all chars were errors, we reached the start/end of a string 
-        if len(tmp) == len(charset) {
+        if len(tmp) == len(*charset) {
             if dir == "->" {
                 pending[key] = "<-"
             } else {
