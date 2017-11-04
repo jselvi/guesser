@@ -20,19 +20,18 @@ func Test_run(t *testing.T) {
 		want             int
 		wantErr          bool
 	}{
-		{"check doesn't exist", exeFail      , "xxx", -1, true},
-		{"result not integer", exeWrong      , "xxx", -1, true},
-		{"check 123", exeRight               , "123",  0, false},
-		{"check eef", exeRight               , "eef",  0, false},
-		{"check 789", exeRight               , "789",  1, false},
-		{"check hjk", exeRight               , "hjk",  1, false},
-		{"check faa", exeRight               , "faa",  0, false},
-		{"check 234", exeRight               , "234",  0, false},
-		{"check zxc", exeRight + " 1"        , "zxc",  1, false},
-		{"check caf", exeRight + " 1 2"      , "caf",  0, false},
-		{"check xyz", exeRight + " 1 2 3"    , "xyz",  1, false},
-		{"check 4ca", exeRight + " 1 2 3 4"  , "4ca",  0, false},
-		{"check tyu", exeRight + " 1 2 3 4 5", "tyu", -1, true},
+		{"check doesn't exist", exeFail, "xxx", -1, true},
+		{"result not integer", exeWrong, "xxx", -1, true},
+		{"check 123", exeRight         , "123",  0, false},
+		{"check eef", exeRight         , "eef",  0, false},
+		{"check 789", exeRight         , "789",  1, false},
+		{"check hjk", exeRight         , "hjk",  1, false},
+		{"check faa", exeRight         , "faa",  0, false},
+		{"check 234", exeRight         , "234",  0, false},
+		{"check zxc", exeRight         , "zxc",  1, false},
+		{"check caf", exeRight         , "caf",  0, false},
+		{"check xyz", exeRight         , "xyz",  1, false},
+		{"check 4ca", exeRight         , "4ca",  0, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

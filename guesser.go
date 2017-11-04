@@ -21,23 +21,7 @@ import (
 func run(cmd string, param string) (int, error) {
     // Split Cmd
     v := strings.Split(cmd," ")
-    var guess *exec.Cmd
-    switch len(v) {
-    case 1:
-        guess = exec.Command( v[0] )
-    case 2:
-        guess = exec.Command( v[0], v[1] )
-    case 3:
-        guess = exec.Command( v[0], v[1], v[2] )
-    case 4:
-        guess = exec.Command( v[0], v[1], v[2], v[3] )
-    case 5:
-        guess = exec.Command( v[0], v[1], v[2], v[3], v[4] )
-    case 6:
-        guess = exec.Command( v[0], v[1], v[2], v[3], v[4], v[5] )
-    default:
-        return -1, errors.New("sorry, we couldn't parse Cmd")
-    }
+    guess := exec.Command( v[0], v[1:]... )
 
     stdin , _ := guess.StdinPipe()
     io.WriteString(stdin, param+"\n")
@@ -106,7 +90,7 @@ func main() {
 
     // Check stability
     scoreRight, err1 := score(*cmd, *right, 5)
-    _          , err2 := score(*cmd, *wrong, 5)
+    _         , err2 := score(*cmd, *wrong, 5)
     if (err1 != nil) || (err2 != nil) {
         fmt.Println("Unstable")
     }
