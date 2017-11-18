@@ -104,8 +104,8 @@ func Test_sample(t *testing.T) {
 func Test_isAlreadyResult(t *testing.T) {
     tests := []struct {
         name string
-        m map[string]bool
-        s string
+        m    map[string]bool
+        s    string
         want bool
     }{
         {"empty map", map[string]bool{},                            "whatever", false},
@@ -116,6 +116,26 @@ func Test_isAlreadyResult(t *testing.T) {
         t.Run(tt.name, func(t *testing.T) {
             if got := isAlreadyResult(tt.m, tt.s); got != tt.want {
                 t.Errorf("isAlreadyResult() = %v, want %v", got, tt.want)
+            }
+        })
+    }
+}
+
+func Test_guessIt(t *testing.T) {
+    tests := []struct {
+        name string
+        p    map[string]string
+        resultLen int
+    }{
+        // "§§" -> unset ; -1 -> unset
+        //{"no parameters", ""},
+        {"right cmd", map[string]string{"cmd": exeRight, "right": "1"}, 2 },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            if got := guessItMap(tt.p); len(got) != tt.resultLen {
+                t.Errorf("guessIt() = %v results, want %v", len(got), tt.resultLen)
             }
         })
     }

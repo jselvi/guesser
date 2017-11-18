@@ -17,6 +17,16 @@ import (
    "errors"
 )
 
+const (
+    defaultCmd     = "sh curl.sh"
+    defaultRight   = " "
+    defaultWrong   = "^"
+    defaultCharset = "0123456789abcdef"
+    defaultInit    = ""
+    defaultThreads = 10
+    defaultDelay   = 0
+)
+
 // Dirty trick to run Cmd with unknown amount of params
 func run(cmd string, param string) (int, error) {
     // Split Cmd
@@ -79,20 +89,67 @@ func isAlreadyResult(m map[string]bool, s string) bool {
 // Main func
 func main() {
     // Params parsing
-    cmd     := flag.String("cmd"    , "sh curl.sh"      , "command to run, parameter sent via stdin")
-    right   := flag.String("right"  , " "               , "term that makes cmd to give a right response")
-    wrong   := flag.String("wrong"  , "^"               , "term that makes cmd to give a wrong response")
-    charset := flag.String("charset", "0123456789abcdef", "charset we use for guessing")
-    init    := flag.String("init"   , ""                , "Initial search string")
-    threads := flag.Int(   "threads", 10                , "amount of threads to use")
-    //delay   := flag.Int(   "delay"  , 0                 , "delay between connections")
+    cmd     := flag.String("cmd"    , defaultCmd    , "command to run, parameter sent via stdin")
+    right   := flag.String("right"  , defaultRight  , "term that makes cmd to give a right response")
+    wrong   := flag.String("wrong"  , defaultWrong  , "term that makes cmd to give a wrong response")
+    charset := flag.String("charset", defaultCharset, "charset we use for guessing")
+    init    := flag.String("init"   , defaultInit   , "Initial search string")
+    threads := flag.Int(   "threads", defaultThreads, "amount of threads to use")
+    delay   := flag.Int(   "delay"  , defaultDelay  , "delay between connections")
     flag.Parse()
 
+    // Call to the main func
+    guessIt( cmd, right, wrong, charset, init, threads, delay, false)
+}
+
+// Gets arguments from map instead of command line (for testing purposes)
+func guessItMap( param map[string]string ) map[string]bool {
+    var cmd     = defaultCmd
+    var right   = defaultRight
+    var wrong   = defaultWrong
+    var charset = defaultCharset
+    var init    = defaultInit
+    var threads = defaultThreads
+    var delay   = defaultDelay
+    var err error
+
+    for name, value := range param {
+        switch name {
+        case "cmd":
+            cmd = value
+        case "right":
+            right = value
+        case "wrong":
+            wrong = value
+        case "charset":
+            charset = value
+        case "init":
+            init = value
+        case "threads":
+            threads, err = strconv.Atoi(value)
+            if err != nil {
+                threads = defaultThreads
+            }
+        case "delay":
+            delay, err = strconv.Atoi(value)
+            if err != nil {
+                delay = defaultDelay
+            }
+        }
+    }
+
+    return guessIt(&cmd, &right, &wrong, &charset, &init, &threads, &delay, true)
+}
+
+// Real core
+func guessIt( cmd, right, wrong, charset, init *string, threads, delay *int, quiet bool) map[string]bool {
     // Check stability
     scoreRight, err1 := score(*cmd, *right, 5)
     _         , err2 := score(*cmd, *wrong, 5)
     if (err1 != nil) || (err2 != nil) {
-        fmt.Println("Unstable")
+        if !quiet {
+            fmt.Println("Unstable")
+        }
     }
 
     // Prepare a Set for substrings and a Set for results
@@ -164,15 +221,23 @@ func main() {
                 pending[key] = "<-"
             } else {
                 res[key] = true
-                fmt.Printf("\r%s\n", key)
+                if !quiet {
+                    fmt.Printf("\r%s\n", key)
+                }
             }
         } else {
-            fmt.Printf("\r%s", key)
+            if !quiet {
+                fmt.Printf("\r%s", key)
+            }
         }
         // Clean temporal map
         tmp = make(map[string]bool)
     }
 
     // Clean the last try
-    fmt.Printf("\r                                                    \r")
+    if !quiet {
+        fmt.Printf("\r                                                    \r")
+    }
+
+    return res
 }
