@@ -28,6 +28,17 @@ const (
 	defaultDebug   = false
 )
 
+// Global variable for debugging
+var debug = defaultDebug
+
+// Print only if debug activated
+func log(message string) {
+	if !debug {
+		return
+	}
+	fmt.Println(message)
+}
+
 // Dirty trick to run Cmd with unknown amount of params
 func run(cmd string, param string) (int, error) {
 	// Split Cmd
@@ -97,17 +108,18 @@ func main() {
 	init := flag.String("init", defaultInit, "Initial search string")
 	threads := flag.Int("threads", defaultThreads, "amount of threads to use")
 	delay := flag.Int("delay", defaultDelay, "delay between connections")
-	debug := flag.Bool("debug", defaultDebug, "print verbose output (debugging)")
+	debugFlag := flag.Bool("debug", defaultDebug, "print verbose output (debugging)")
 	flag.Parse()
 
 	// If debug is activated, we disable the regular output
+	debug = *debugFlag
 	var quiet = false
-	if *debug {
+	if debug {
 		quiet = true
 	}
 
 	// Call to the main func
-	guessIt(cmd, right, wrong, charset, init, threads, delay, quiet, *debug)
+	guessIt(cmd, right, wrong, charset, init, threads, delay, quiet)
 }
 
 // Gets arguments from map instead of command line (for testing purposes)
@@ -119,7 +131,7 @@ func guessItMap(param map[string]string) map[string]bool {
 	var init = defaultInit
 	var threads = defaultThreads
 	var delay = defaultDelay
-	var debug = defaultDebug
+	var debugFlag = defaultDebug
 	var err error
 
 	for name, value := range param {
@@ -145,18 +157,20 @@ func guessItMap(param map[string]string) map[string]bool {
 				delay = defaultDelay
 			}
 		case "debug":
-			debug, err = strconv.ParseBool(value)
+			debugFlag, err = strconv.ParseBool(value)
 			if err != nil {
 				debug = defaultDebug
+			} else {
+				debug = debugFlag
 			}
 		}
 	}
 
-	return guessIt(&cmd, &right, &wrong, &charset, &init, &threads, &delay, true, debug)
+	return guessIt(&cmd, &right, &wrong, &charset, &init, &threads, &delay, true)
 }
 
 // Real core
-func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quiet bool, debug bool) map[string]bool {
+func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quiet bool) map[string]bool {
 	// Check stability
 	scoreRight, err1 := score(*cmd, *right, 5)
 	_, err2 := score(*cmd, *wrong, 5)
