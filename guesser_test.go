@@ -5,138 +5,138 @@
 package main
 
 import (
-    "testing"
+	"testing"
 )
 
 const (
-    exeRight = "sh guesser_test.sh"
-    exeWrong = "cat guesser_test.sh"
-    exeFail  = "doesntexist"
+	exeRight = "sh guesser_test.sh"
+	exeWrong = "cat guesser_test.sh"
+	exeFail  = "doesntexist"
 )
 
 func Test_run(t *testing.T) {
-    tests := []struct {
-        name, cmd, param string
-        want             int
-        wantErr          bool
-    }{
-        {"check doesn't exist", exeFail, "xxx", -1, true},
-        {"result not integer", exeWrong, "xxx", -1, true},
-        {"check 123", exeRight, "123", 0, false},
-        {"check eef", exeRight, "eef", 0, false},
-        {"check 789", exeRight, "789", 1, false},
-        {"check hjk", exeRight, "hjk", 1, false},
-        {"check faa", exeRight, "faa", 0, false},
-        {"check 234", exeRight, "234", 0, false},
-        {"check zxc", exeRight, "zxc", 1, false},
-        {"check caf", exeRight, "caf", 0, false},
-        {"check xyz", exeRight, "xyz", 1, false},
-        {"check 4ca", exeRight, "4ca", 0, false},
-    }
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            got, err := run(tt.cmd, tt.param)
-            if (err != nil) != tt.wantErr {
-                t.Errorf("run() error = %v, wantErr %v", err, tt.wantErr)
-                return
-            }
-            if got != tt.want {
-                t.Errorf("run() = %v, want %v", got, tt.want)
-            }
-        })
-    }
+	tests := []struct {
+		name, cmd, param string
+		want             int
+		wantErr          bool
+	}{
+		{"check doesn't exist", exeFail, "xxx", -1, true},
+		{"result not integer", exeWrong, "xxx", -1, true},
+		{"check 123", exeRight, "123", 0, false},
+		{"check eef", exeRight, "eef", 0, false},
+		{"check 789", exeRight, "789", 1, false},
+		{"check hjk", exeRight, "hjk", 1, false},
+		{"check faa", exeRight, "faa", 0, false},
+		{"check 234", exeRight, "234", 0, false},
+		{"check zxc", exeRight, "zxc", 1, false},
+		{"check caf", exeRight, "caf", 0, false},
+		{"check xyz", exeRight, "xyz", 1, false},
+		{"check 4ca", exeRight, "4ca", 0, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := run(tt.cmd, tt.param)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("run() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("run() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func Test_score(t *testing.T) {
-    tests := []struct {
-        name, cmd, param string
-        repeat, want     int
-        wantErr          bool
-    }{
-        {"check 123", exeRight, "123", 5, 0, false},
-        {"check 789", exeRight, "789", 5, 1, false},
-    }
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            got, err := score(tt.cmd, tt.param, tt.repeat)
-            if (err != nil) != tt.wantErr {
-                t.Errorf("score() error = %v, wantErr %v", err, tt.wantErr)
-                return
-            }
-            if got != tt.want {
-                t.Errorf("score() = %v, want %v", got, tt.want)
-            }
-        })
-    }
+	tests := []struct {
+		name, cmd, param string
+		repeat, want     int
+		wantErr          bool
+	}{
+		{"check 123", exeRight, "123", 5, 0, false},
+		{"check 789", exeRight, "789", 5, 1, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := score(tt.cmd, tt.param, tt.repeat)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("score() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("score() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func Test_sample(t *testing.T) {
-    tests := []struct {
-        name    string
-        keys    []string
-        want    string
-        wantErr bool
-    }{
-        {"Empty map", []string{}, "", true},
-        {"map add long", []string{"long"}, "long", false},
-        {"map add srt", []string{"long", "srt"}, "long", false},
-        {"map add longest", []string{"longest", "long", "srt"}, "longest", false},
-    }
+	tests := []struct {
+		name    string
+		keys    []string
+		want    string
+		wantErr bool
+	}{
+		{"Empty map", []string{}, "", true},
+		{"map add long", []string{"long"}, "long", false},
+		{"map add srt", []string{"long", "srt"}, "long", false},
+		{"map add longest", []string{"longest", "long", "srt"}, "longest", false},
+	}
 
-    for _, tt := range tests {
-        var m = make(map[string]string)
-        for _, key := range tt.keys {
-            m[key] = "x"
-        }
-        t.Run(tt.name, func(t *testing.T) {
-            got, err := sample(m)
-            if (err != nil) != tt.wantErr {
-                t.Errorf("sample() error = %v, wantErr %v", err, tt.wantErr)
-                return
-            }
-            if got != tt.want {
-                t.Errorf("sample() = %v, want %v", got, tt.want)
-            }
-        })
-    }
+	for _, tt := range tests {
+		var m = make(map[string]string)
+		for _, key := range tt.keys {
+			m[key] = "x"
+		}
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := sample(m)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("sample() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("sample() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func Test_isAlreadyResult(t *testing.T) {
-    tests := []struct {
-        name string
-        m    map[string]bool
-        s    string
-        want bool
-    }{
-        {"empty map", map[string]bool{},                            "whatever", false},
-        {"found",     map[string]bool{"test": true, "found": true}, "oun",      true },
-        {"not found", map[string]bool{"test": true, "lost": true},  "oun",      false},
-    }
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            if got := isAlreadyResult(tt.m, tt.s); got != tt.want {
-                t.Errorf("isAlreadyResult() = %v, want %v", got, tt.want)
-            }
-        })
-    }
+	tests := []struct {
+		name string
+		m    map[string]bool
+		s    string
+		want bool
+	}{
+		{"empty map", map[string]bool{}, "whatever", false},
+		{"found", map[string]bool{"test": true, "found": true}, "oun", true},
+		{"not found", map[string]bool{"test": true, "lost": true}, "oun", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isAlreadyResult(tt.m, tt.s); got != tt.want {
+				t.Errorf("isAlreadyResult() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func Test_guessIt(t *testing.T) {
-    tests := []struct {
-        name string
-        p    map[string]string
-        resultLen int
-    }{
-        // "§§" -> unset ; -1 -> unset
-        //{"no parameters", ""},
-        {"right cmd", map[string]string{"cmd": exeRight, "right": "1"}, 2 },
-    }
+	tests := []struct {
+		name      string
+		p         map[string]string
+		resultLen int
+	}{
+		// "§§" -> unset ; -1 -> unset
+		//{"no parameters", ""},
+		{"right cmd", map[string]string{"cmd": exeRight, "right": "1"}, 2},
+	}
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            if got := guessItMap(tt.p); len(got) != tt.resultLen {
-                t.Errorf("guessIt() = %v results, want %v", len(got), tt.resultLen)
-            }
-        })
-    }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := guessItMap(tt.p); len(got) != tt.resultLen {
+				t.Errorf("guessIt() = %v results, want %v", len(got), tt.resultLen)
+			}
+		})
+	}
 }
