@@ -41,6 +41,8 @@ func log(message string) {
 
 // Dirty trick to run Cmd with unknown amount of params
 func run(cmd string, param string) (int, error) {
+	log("Executing: " + cmd + " with " + param)
+
 	// Split Cmd
 	v := strings.Split(cmd, " ")
 	guess := exec.Command(v[0], v[1:]...)
@@ -52,6 +54,7 @@ func run(cmd string, param string) (int, error) {
 		return -1, err
 	}
 
+	log("Output: " + string(out))
 	score, err := strconv.Atoi(strings.Split(string(out), "\n")[0])
 	if err != nil {
 		return -1, err
@@ -63,10 +66,14 @@ func run(cmd string, param string) (int, error) {
 // Gets score if "repeat" tries get the same result
 func score(cmd string, param string, repeat int) (int, error) {
 	res, _ := run(cmd, param)
+	log("Score: " + strconv.Itoa(res))
 	for i := 0; i < repeat-1; i++ {
 		newres, _ := run(cmd, param)
+		log("Score: " + strconv.Itoa(newres))
 		if res != newres {
-			return -1, errors.New("Site seems to be unestable")
+			m := "Site seems to be unestable"
+			log(m)
+			return -1, errors.New(m)
 		}
 	}
 	return res, nil
@@ -172,11 +179,15 @@ func guessItMap(param map[string]string) map[string]bool {
 // Real core
 func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quiet bool) map[string]bool {
 	// Check stability
+	log("Checking stability: Right Guess")
 	scoreRight, err1 := score(*cmd, *right, 5)
+	log("Checking stability: Wrong Guess")
 	_, err2 := score(*cmd, *wrong, 5)
 	if (err1 != nil) || (err2 != nil) {
 		if !quiet {
-			fmt.Println("Unstable")
+			m := "Unestable"
+			log(m)
+			fmt.Println(m)
 		}
 	}
 
@@ -193,9 +204,11 @@ func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quie
 		key, _ := sample(pending)
 		dir := pending[key]
 		delete(pending, key)
+		log("Next Guess: " + dir)
 
 		// If key is substring from a previous result, continue
 		if len(key) > len(*init)+1 && isAlreadyResult(res, key) {
+			log(dir + " was substring of a previous result. Next.")
 			continue
 		}
 
@@ -226,13 +239,16 @@ func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quie
 
 				// Calculate score
 				score, _ := run(cmd, term)
+				log("Guessing " + term + " with score " + strconv.Itoa(score))
 
 				// Save results for next iteration
 				if score == right {
+					log(term + " was a RIGHT guess")
 					mtx.Lock()
 					pending[term] = dir
 					mtx.Unlock()
 				} else {
+					log(term + " was a wrong guess")
 					mtx.Lock()
 					tmp[term] = true
 					mtx.Unlock()
@@ -246,8 +262,10 @@ func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quie
 		// If all chars were errors, we reached the start/end of a string
 		if len(tmp) == len(*charset) {
 			if dir == "->" {
+				log("Guessing in <- direction")
 				pending[key] = "<-"
 			} else {
+				log("Finish guessing")
 				res[key] = true
 				if !quiet {
 					fmt.Printf("\r%s\n", key)
