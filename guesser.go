@@ -25,6 +25,7 @@ const (
 	defaultInit    = ""
 	defaultThreads = 10
 	defaultDelay   = 0
+	defaultDebug   = false
 )
 
 // Dirty trick to run Cmd with unknown amount of params
@@ -96,10 +97,17 @@ func main() {
 	init := flag.String("init", defaultInit, "Initial search string")
 	threads := flag.Int("threads", defaultThreads, "amount of threads to use")
 	delay := flag.Int("delay", defaultDelay, "delay between connections")
+	debug := flag.Bool("debug", defaultDebug, "print verbose output (debugging)")
 	flag.Parse()
 
+	// If debug is activated, we disable the regular output
+	var quiet = false
+	if *debug {
+		quiet = true
+	}
+
 	// Call to the main func
-	guessIt(cmd, right, wrong, charset, init, threads, delay, false)
+	guessIt(cmd, right, wrong, charset, init, threads, delay, quiet, *debug)
 }
 
 // Gets arguments from map instead of command line (for testing purposes)
@@ -111,6 +119,7 @@ func guessItMap(param map[string]string) map[string]bool {
 	var init = defaultInit
 	var threads = defaultThreads
 	var delay = defaultDelay
+	var debug = defaultDebug
 	var err error
 
 	for name, value := range param {
@@ -135,14 +144,19 @@ func guessItMap(param map[string]string) map[string]bool {
 			if err != nil {
 				delay = defaultDelay
 			}
+		case "debug":
+			debug, err = strconv.ParseBool(value)
+			if err != nil {
+				debug = defaultDebug
+			}
 		}
 	}
 
-	return guessIt(&cmd, &right, &wrong, &charset, &init, &threads, &delay, true)
+	return guessIt(&cmd, &right, &wrong, &charset, &init, &threads, &delay, true, debug)
 }
 
 // Real core
-func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quiet bool) map[string]bool {
+func guessIt(cmd, right, wrong, charset, init *string, threads, delay *int, quiet bool, debug bool) map[string]bool {
 	// Check stability
 	scoreRight, err1 := score(*cmd, *right, 5)
 	_, err2 := score(*cmd, *wrong, 5)

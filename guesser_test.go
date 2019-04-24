@@ -4,9 +4,7 @@
 
 package main
 
-import (
-	"testing"
-)
+import "testing"
 
 const (
 	exeRight = "sh guesser_test.sh"
